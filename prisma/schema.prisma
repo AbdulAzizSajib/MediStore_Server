@@ -24,6 +24,18 @@ model User {
   sessions      Session[]
   accounts      Account[]
 
+  role UserRole? @default(CUSTOMER)
+
+  status    UserStatus? @default(ACTIVE)
+  medicines Medicine[]
+  orders    Orders[] // customer orders
+
+  orderItems OrderItem[]
+  reviews    Review[]
+
+  phone   String?
+  address String?
+
   @@unique([email])
   @@map("user")
 }
@@ -74,4 +86,126 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+// model for medicines
+
+model Medicine {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  price       Decimal  @db.Decimal(10, 2)
+  stock       Int
+  imageUrl    String?
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  sellerId String
+  seller   User   @relation(fields: [sellerId], references: [id], onDelete: Restrict)
+
+  status       MedicineStatus @default(AVAILABLE)
+  manufacturer String?
+
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  orderItems OrderItem[]
+  reviews    Review[]
+
+  @@index([sellerId])
+  @@index([categoryId])
+  @@index([name])
+}
+
+// model for categories
+
+model Category {
+  id          String     @id @default(uuid())
+  name        String     @unique
+  description String?
+  imageUrl    String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  medicines   Medicine[]
+}
+
+// model for orders
+
+model Orders {
+  id              String      @id @default(uuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id], onDelete: Restrict)
+  totalAmount     Decimal     @db.Decimal(10, 2)
+  status          OrderStatus @default(PLACED)
+  phone           String?
+  shippingAddress String
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  orderItems      OrderItem[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// model for order items
+
+model OrderItem {
+  id         String   @id @default(uuid())
+  orderId    String
+  order      Orders   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  // 
+  medicineId String
+  medicine   Medicine @relation(fields: [medicineId], references: [id], onDelete: Cascade)
+  // 
+  sellerId   String
+  seller     User     @relation(fields: [sellerId], references: [id], onDelete: Restrict)
+
+  quantity  Int
+  price     Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([sellerId])
+  @@index([orderId])
+}
+
+//model for reviews
+
+model Review {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  medicineId String
+  medicine   Medicine @relation(fields: [medicineId], references: [id], onDelete: Cascade)
+
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, medicineId])
+}
+
+enum UserRole {
+  CUSTOMER
+  SELLER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  BANNED
+}
+
+enum OrderStatus {
+  PLACED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum MedicineStatus {
+  AVAILABLE
+  DISCONTINUED
 }

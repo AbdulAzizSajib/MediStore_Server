@@ -1,0 +1,91 @@
+import { Request, Response } from "express";
+import { medicineService } from "./medicine.service";
+import paginationSortingHelper from "../../helpers/paginationSortingHelper";
+
+const createMedicine = async (req: Request, res: Response) => {
+  try {
+    const user = req.user;
+
+    // Convert string values to proper types
+    const payload = {
+      name: req.body.name,
+      description: req.body.description,
+      price: parseFloat(req.body.price),
+      stock: parseInt(req.body.stock, 10),
+      imageUrl: req.body.imageUrl,
+      categoryId: req.body.categoryId,
+      manufacturer: req.body.manufacturer,
+      type: req.body.type,
+    };
+
+    const result = await medicineService.createMedicine(
+      payload,
+      user?.id as string,
+    );
+    res.status(201).json({
+      message: "Medicine created successfully",
+      data: result,
+    });
+  } catch (error) {
+    console.error("Error creating medicine:", error);
+    res.status(500).json({
+      message: "Internal server error",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};
+
+const getAllMedicines = async (req: Request, res: Response) => {
+  try {
+    const { search } = req.query;
+    // console.log(search);
+    const searchString = typeof search === "string" ? search : undefined;
+    const { page, limit, skip, sortBy, sortOrder } = paginationSortingHelper(
+      req.query,
+    );
+
+    const result = await medicineService.getAllMedicines({
+      search: searchString,
+      page,
+      limit,
+      skip,
+      sortBy,
+      sortOrder,
+    });
+    res.status(200).json({
+      message: "Medicines fetched successfully",
+      data: result,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error instanceof Error ? error.message : "Something went wrong",
+      data: null,
+    });
+  }
+};
+
+const getMedicineById = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id;
+    if (!id) {
+      return res.status(400).json({ message: "Medicine ID is required" });
+    }
+    const medicine = await medicineService.getMedicineById(id as string);
+
+    res.status(200).json({
+      message: "Medicine fetched successfully",
+      data: medicine,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error instanceof Error ? error.message : "Something went wrong",
+      data: null,
+    });
+  }
+};
+
+export const medicineController = {
+  createMedicine,
+  getAllMedicines,
+  getMedicineById,
+};

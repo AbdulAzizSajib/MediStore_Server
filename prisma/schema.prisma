@@ -105,11 +105,11 @@ model Medicine {
 
   status       MedicineStatus @default(AVAILABLE)
   manufacturer String?
-
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
-  orderItems OrderItem[]
-  reviews    Review[]
+  type         String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  orderItems   OrderItem[]
+  reviews      Review[]
 
   @@index([sellerId])
   @@index([categoryId])

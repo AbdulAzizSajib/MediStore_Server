@@ -18,6 +18,9 @@ const createMedicine = async (
       ...payload,
       sellerId: userId,
     },
+    include: {
+      category: true,
+    },
   });
   return result;
 };
@@ -38,7 +41,7 @@ const getAllMedicines = async ({
   sortOrder: string;
 }) => {
   const andConditions: any[] = [];
-  console.log(andConditions);
+
   if (search) {
     andConditions.push({
       OR: [
@@ -106,8 +109,60 @@ const getMedicineById = async (medicineId: string) => {
   return medicine;
 };
 
+const deleteMedicine = async (medicineId: string, userId: string) => {
+  // Verify the medicine belongs to the seller before deleting
+  await prisma.medicine.findFirstOrThrow({
+    where: {
+      id: medicineId,
+      sellerId: userId,
+    },
+  });
+
+  await prisma.medicine.delete({
+    where: { id: medicineId },
+  });
+};
+
+const updateMedicine = async (
+  payload: {
+    name: string;
+    description?: string;
+    price: number;
+    stock: number;
+    imageUrl?: string;
+    categoryId: string;
+    manufacturer?: string;
+    type?: string;
+  },
+  userId: string,
+  medicineId: string,
+) => {
+  // Verify the medicine belongs to the seller
+  await prisma.medicine.findFirstOrThrow({
+    where: {
+      id: medicineId,
+      sellerId: userId,
+    },
+  });
+
+  const result = await prisma.medicine.update({
+    where: {
+      id: medicineId,
+    },
+    data: {
+      ...payload,
+    },
+    include: {
+      category: true,
+    },
+  });
+  return result;
+};
+
 export const medicineService = {
   createMedicine,
   getAllMedicines,
   getMedicineById,
+  deleteMedicine,
+  updateMedicine,
 };

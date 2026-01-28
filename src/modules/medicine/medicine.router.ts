@@ -13,4 +13,16 @@ medicineRouter.post(
 medicineRouter.get("/", medicineController.getAllMedicines);
 medicineRouter.get("/:id", medicineController.getMedicineById);
 
+medicineRouter.delete(
+  "/:id",
+  authGuard(UserRole.SELLER, UserRole.ADMIN),
+  medicineController.deleteMedicine,
+);
+
+medicineRouter.put(
+  "/:id",
+  authGuard(UserRole.SELLER, UserRole.ADMIN),
+  medicineController.updateMedicine,
+);
+
 export default medicineRouter;

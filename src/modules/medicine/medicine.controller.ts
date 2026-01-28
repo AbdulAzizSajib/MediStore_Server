@@ -84,8 +84,65 @@ const getMedicineById = async (req: Request, res: Response) => {
   }
 };
 
+const deleteMedicine = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id;
+    if (!id) {
+      return res.status(400).json({ message: "Medicine ID is required" });
+    }
+    const user = req.user;
+    await medicineService.deleteMedicine(id as string, user?.id as string);
+
+    res.status(200).json({
+      message: "Medicine deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error instanceof Error ? error.message : "Something went wrong",
+      data: null,
+    });
+  }
+};
+
+const updateMedicine = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id;
+    if (!id) {
+      return res.status(400).json({ message: "Medicine ID is required" });
+    }
+    const user = req.user;
+    const payload = {
+      name: req.body.name,
+      description: req.body.description,
+      price: parseFloat(req.body.price),
+      stock: parseInt(req.body.stock, 10),
+      imageUrl: req.body.imageUrl,
+      categoryId: req.body.categoryId,
+      manufacturer: req.body.manufacturer,
+      type: req.body.type,
+    };
+    const result = await medicineService.updateMedicine(
+      payload,
+      user?.id as string,
+      id as string,
+    );
+
+    res.status(200).json({
+      message: "Medicine updated successfully",
+      data: result,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error instanceof Error ? error.message : "Something went wrong",
+      data: null,
+    });
+  }
+};
+
 export const medicineController = {
   createMedicine,
   getAllMedicines,
   getMedicineById,
+  deleteMedicine,
+  updateMedicine,
 };

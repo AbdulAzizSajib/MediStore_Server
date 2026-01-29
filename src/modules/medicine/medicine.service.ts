@@ -27,6 +27,8 @@ const createMedicine = async (
 
 const getAllMedicines = async ({
   search,
+  minPrice,
+  maxPrice,
   page,
   limit,
   skip,
@@ -34,6 +36,8 @@ const getAllMedicines = async ({
   sortOrder,
 }: {
   search?: string | undefined;
+  minPrice?: number | undefined;
+  maxPrice?: number | undefined;
   page: number;
   limit: number;
   skip: number;
@@ -66,6 +70,16 @@ const getAllMedicines = async ({
           },
         },
       ],
+    });
+  }
+
+  // Price range filter
+  if (minPrice !== undefined || maxPrice !== undefined) {
+    andConditions.push({
+      price: {
+        ...(minPrice !== undefined && { gte: minPrice }),
+        ...(maxPrice !== undefined && { lte: maxPrice }),
+      },
     });
   }
 

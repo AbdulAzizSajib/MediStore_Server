@@ -37,15 +37,20 @@ const createMedicine = async (req: Request, res: Response) => {
 
 const getAllMedicines = async (req: Request, res: Response) => {
   try {
-    const { search } = req.query;
-    // console.log(search);
+    const { search, minPrice, maxPrice } = req.query;
+
     const searchString = typeof search === "string" ? search : undefined;
+    const minPriceNumber = minPrice ? parseFloat(minPrice as string) : undefined;
+    const maxPriceNumber = maxPrice ? parseFloat(maxPrice as string) : undefined;
+
     const { page, limit, skip, sortBy, sortOrder } = paginationSortingHelper(
       req.query,
     );
 
     const result = await medicineService.getAllMedicines({
       search: searchString,
+      minPrice: minPriceNumber,
+      maxPrice: maxPriceNumber,
       page,
       limit,
       skip,

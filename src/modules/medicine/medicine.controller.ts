@@ -40,8 +40,13 @@ const getAllMedicines = async (req: Request, res: Response) => {
     const { search, minPrice, maxPrice } = req.query;
 
     const searchString = typeof search === "string" ? search : undefined;
-    const minPriceNumber = minPrice ? parseFloat(minPrice as string) : undefined;
-    const maxPriceNumber = maxPrice ? parseFloat(maxPrice as string) : undefined;
+    const minPriceNumber = minPrice
+      ? parseFloat(minPrice as string)
+      : undefined;
+    const maxPriceNumber = maxPrice
+      ? parseFloat(maxPrice as string)
+      : undefined;
+    const category = req.query.category as string | undefined;
 
     const { page, limit, skip, sortBy, sortOrder } = paginationSortingHelper(
       req.query,
@@ -51,6 +56,7 @@ const getAllMedicines = async (req: Request, res: Response) => {
       search: searchString,
       minPrice: minPriceNumber,
       maxPrice: maxPriceNumber,
+      category,
       page,
       limit,
       skip,

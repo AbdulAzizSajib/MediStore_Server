@@ -15,7 +15,12 @@ orderRouter.get(
   orderController.getUserOrders,
 );
 
-// Specific routes MUST come before dynamic :id route
+orderRouter.get(
+  "/all",
+  authGuard(UserRole.ADMIN),
+  orderController.getAllOrders,
+);
+
 orderRouter.get(
   "/seller",
   authGuard(UserRole.SELLER),
@@ -24,7 +29,7 @@ orderRouter.get(
 
 orderRouter.get(
   "/:id",
-  authGuard(UserRole.CUSTOMER),
+  authGuard(UserRole.CUSTOMER, UserRole.ADMIN, UserRole.SELLER),
   orderController.getOrderById,
 );
 

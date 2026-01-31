@@ -204,10 +204,28 @@ const updateOrderStatus = async (req: Request, res: Response) => {
   }
 };
 
+const getAllOrders = async (req: Request, res: Response) => {
+  try {
+    const orders = await orderService.getAllOrders();
+    res.status(200).json({
+      success: true,
+      message: "All orders retrieved successfully",
+      data: orders,
+    });
+  } catch (error) {
+    console.error("Get all orders error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to retrieve all orders",
+    });
+  }
+};
+
 export const orderController = {
   createOrder,
   getUserOrders,
   getOrderById,
   getOrderBySellerId,
   updateOrderStatus,
+  getAllOrders,
 };

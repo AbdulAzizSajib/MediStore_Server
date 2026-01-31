@@ -54,7 +54,7 @@ const createOrder = async (
       }
     }
 
-    // Calculate total from DATABASE prices (not client)
+    // Calculate total from DATABASE prices
     let totalAmount = 0;
     const orderItemData = payload.orderItems.map((item) => {
       const medicine = medicines.find((m) => m.id === item.medicineId)!;
@@ -264,10 +264,39 @@ const updateOrderStatus = async (orderId: string, status: OrderStatus) => {
   });
 };
 
+// Get all orders (Admin)
+const getAllOrders = async () => {
+  return await prisma.orders.findMany({
+    include: {
+      orderItems: {
+        include: {
+          medicine: true,
+          seller: {
+            select: {
+              id: true,
+              name: true,
+              phone: true,
+            },
+          },
+        },
+      },
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+};
+
 export const orderService = {
   createOrder,
   getUserOrders,
   getOrderById,
   getOrderBySellerId,
   updateOrderStatus,
+  getAllOrders,
 };

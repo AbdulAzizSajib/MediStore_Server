@@ -132,13 +132,18 @@ const getMedicineById = async (medicineId: string) => {
 };
 
 const deleteMedicine = async (medicineId: string, userId: string) => {
-  // Verify the medicine belongs to the seller before deleting
-  await prisma.medicine.findFirstOrThrow({
+  const medicine = await prisma.medicine.findUnique({
     where: {
       id: medicineId,
-      sellerId: userId,
     },
   });
+  if (!medicine) {
+    throw new Error("Medicine not found");
+  }
+  console.log("seller id:", medicine.sellerId);
+  if (medicine.sellerId !== userId) {
+    throw new Error("Unauthorized to delete this medicine");
+  }
 
   await prisma.medicine.delete({
     where: { id: medicineId },
@@ -181,10 +186,23 @@ const updateMedicine = async (
   return result;
 };
 
+const getAllMedicinesBySellerId = async (sellerId: string) => {
+  const medicines = await prisma.medicine.findMany({
+    where: {
+      sellerId,
+    },
+    include: {
+      category: true,
+    },
+  });
+  return medicines;
+};
+
 export const medicineService = {
   createMedicine,
   getAllMedicines,
   getMedicineById,
   deleteMedicine,
   updateMedicine,
+  getAllMedicinesBySellerId,
 };

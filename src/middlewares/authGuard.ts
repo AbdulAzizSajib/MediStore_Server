@@ -27,8 +27,8 @@ const authGuard = (...roles: UserRole[]) => {
       const session = await auth.api.getSession({
         headers: req.headers as any,
       });
+      console.log("Session Data Today:", session);
 
-      console.log("Session Data:", session);
       if (!session) {
         return res.status(401).json({ message: "You are not authorized" });
       }

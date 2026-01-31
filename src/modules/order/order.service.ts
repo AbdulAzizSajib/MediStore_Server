@@ -1,3 +1,4 @@
+import { OrderStatus } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
 
 interface IOrderItem {
@@ -177,7 +178,6 @@ const getOrderById = async (orderId: string, userId: string) => {
     throw new Error("Order not found");
   }
 
-  //  Security: User can only see their own orders
   if (order.userId !== userId) {
     throw new Error("Unauthorized access to order");
   }
@@ -185,8 +185,89 @@ const getOrderById = async (orderId: string, userId: string) => {
   return order;
 };
 
+// Get all orders
+const getOrderBySellerId = async (sellerId: string) => {
+  const orderItemCount = await prisma.orderItem.count({
+    where: { sellerId: sellerId },
+  });
+
+  return await prisma.orders.findMany({
+    where: {
+      orderItems: {
+        some: {
+          sellerId: sellerId,
+        },
+      },
+    },
+    include: {
+      orderItems: {
+        where: {
+          sellerId: sellerId,
+        },
+        include: {
+          medicine: true,
+          seller: {
+            select: {
+              id: true,
+              name: true,
+              phone: true,
+            },
+          },
+        },
+      },
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+};
+
+// Update order status
+const updateOrderStatus = async (orderId: string, status: OrderStatus) => {
+  const validStatuses = Object.values(OrderStatus);
+  if (!validStatuses.includes(status)) {
+    throw new Error(
+      `Invalid order status. Must be one of: ${validStatuses.join(", ")}`,
+    );
+  }
+
+  const order = await prisma.orders.findUnique({
+    where: { id: orderId },
+  });
+
+  if (!order) {
+    throw new Error("Order not found");
+  }
+
+  // Update the order status
+  return await prisma.orders.update({
+    where: { id: orderId },
+    data: { status },
+    include: {
+      orderItems: {
+        include: {
+          medicine: {
+            select: {
+              id: true,
+              name: true,
+              imageUrl: true,
+            },
+          },
+        },
+      },
+    },
+  });
+};
+
 export const orderService = {
   createOrder,
   getUserOrders,
   getOrderById,
+  getOrderBySellerId,
+  updateOrderStatus,
 };

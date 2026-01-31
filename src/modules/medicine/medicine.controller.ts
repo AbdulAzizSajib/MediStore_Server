@@ -108,7 +108,8 @@ const deleteMedicine = async (req: Request, res: Response) => {
       message: "Medicine deleted successfully",
     });
   } catch (error) {
-    res.status(500).json({
+    console.error("Delete error:", error);
+    return res.status(500).json({
       message: error instanceof Error ? error.message : "Something went wrong",
       data: null,
     });
@@ -143,6 +144,25 @@ const updateMedicine = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (error) {
+    return res.status(500).json({
+      message: error instanceof Error ? error.message : "Something went wrong",
+      data: null,
+    });
+  }
+};
+
+const getAllMedicinesBySellerId = async (req: Request, res: Response) => {
+  try {
+    const user = req.user;
+    // console.log("user---------------", user);
+    const medicines = await medicineService.getAllMedicinesBySellerId(
+      user?.id as string,
+    );
+    res.status(200).json({
+      message: "Medicines fetched successfully - seller wise",
+      data: medicines,
+    });
+  } catch (error) {
     res.status(500).json({
       message: error instanceof Error ? error.message : "Something went wrong",
       data: null,
@@ -156,4 +176,5 @@ export const medicineController = {
   getMedicineById,
   deleteMedicine,
   updateMedicine,
+  getAllMedicinesBySellerId,
 };

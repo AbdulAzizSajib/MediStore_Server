@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { orderService } from "./order.service";
+import { OrderStatus } from "../../../generated/prisma/enums";
 
 const createOrder = async (req: Request, res: Response) => {
   try {
@@ -140,8 +141,73 @@ const getOrderById = async (req: Request, res: Response) => {
   }
 };
 
+const getOrderBySellerId = async (req: Request, res: Response) => {
+  try {
+    const user = req.user;
+    const orders = await orderService.getOrderBySellerId(user?.id as string);
+    res.status(200).json({
+      success: true,
+      message: "Seller orders retrieved successfully",
+      data: orders,
+    });
+  } catch (error) {
+    console.error("Get seller orders error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to retrieve seller orders",
+    });
+  }
+};
+
+const updateOrderStatus = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!status) {
+      return res.status(400).json({
+        success: false,
+        message: "Status is required",
+      });
+    }
+
+    const result = await orderService.updateOrderStatus(
+      id as string,
+      status as OrderStatus,
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Order status updated successfully",
+      data: result,
+    });
+  } catch (error) {
+    console.error("Update order status error:", error);
+
+    if (error instanceof Error) {
+      const statusCode = error.message.includes("not found")
+        ? 404
+        : error.message.includes("Invalid")
+          ? 400
+          : 500;
+
+      return res.status(statusCode).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to update order status",
+    });
+  }
+};
+
 export const orderController = {
   createOrder,
   getUserOrders,
   getOrderById,
+  getOrderBySellerId,
+  updateOrderStatus,
 };

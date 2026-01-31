@@ -6,19 +6,19 @@ const categoryRouter = Express.Router();
 
 categoryRouter.post(
   "/",
-  authGuard(UserRole.ADMIN, UserRole.SELLER),
+  authGuard(UserRole.ADMIN),
   categoryController.createCategory,
 );
 categoryRouter.get("/", categoryController.getAllCategories);
 categoryRouter.get("/:categoryId", categoryController.getCategoryById);
 categoryRouter.put(
   "/:categoryId",
-  authGuard(UserRole.ADMIN, UserRole.SELLER),
+  authGuard(UserRole.ADMIN),
   categoryController.updateCategory,
 );
 categoryRouter.delete(
   "/:categoryId",
-  authGuard(UserRole.ADMIN, UserRole.SELLER),
+  authGuard(UserRole.ADMIN),
   categoryController.deleteCategory,
 );
 

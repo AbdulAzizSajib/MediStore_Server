@@ -221,6 +221,27 @@ const getAllOrders = async (req: Request, res: Response) => {
   }
 };
 
+const trackOrderStatus = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const user = req.user;
+    const order = await orderService.trackOrderStatus(id as string, user?.id as string);
+
+    res.status(200).json({
+      success: true,
+      message: "Order status retrieved successfully",
+      data: order,
+    });
+  }
+  catch (error) {
+    console.error("Track order status error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to retrieve order status",
+    });
+  }
+};
+
 export const orderController = {
   createOrder,
   getUserOrders,
@@ -228,4 +249,5 @@ export const orderController = {
   getOrderBySellerId,
   updateOrderStatus,
   getAllOrders,
+  trackOrderStatus
 };

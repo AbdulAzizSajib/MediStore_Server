@@ -27,6 +27,8 @@ const userStatusUpdate = async (id: string, status: string) => {
   });
 };
 
+
+
 export const userService = {
   getAllUsers,
   userStatusUpdate,

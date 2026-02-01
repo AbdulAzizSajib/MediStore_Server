@@ -292,6 +292,27 @@ const getAllOrders = async () => {
   });
 };
 
+// track order customer status by order id
+const trackOrderStatus = async (orderId: string, userId: string) => {
+  const order = await prisma.orders.findUnique({
+    where: { id: orderId },
+    select: {
+      id: true,
+      status: true,
+      updatedAt: true,
+      userId: true,
+    },
+  });
+  if (!order) {
+    throw new Error("Order not found");
+  }
+  if (order.userId !== userId) {
+    throw new Error("Unauthorized access to order");
+  }
+  return order;
+};
+
+
 export const orderService = {
   createOrder,
   getUserOrders,
@@ -299,4 +320,5 @@ export const orderService = {
   getOrderBySellerId,
   updateOrderStatus,
   getAllOrders,
+  trackOrderStatus
 };

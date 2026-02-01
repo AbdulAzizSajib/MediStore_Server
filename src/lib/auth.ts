@@ -14,7 +14,10 @@ export const auth = betterAuth({
     autoSignIn: false,
   },
 
-  trustedOrigins: [process.env.FRONTEND_URL!],
+  trustedOrigins: [
+    process.env.FRONTEND_URL!,
+    "https://medistoreclient.vercel.app"
+  ],
 
   user: {
     additionalFields: {

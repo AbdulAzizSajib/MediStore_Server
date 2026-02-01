@@ -27,6 +27,12 @@ orderRouter.get(
   orderController.getOrderBySellerId,
 );
 
+    orderRouter.get(
+      "/track/:id",
+      authGuard(UserRole.CUSTOMER),
+      orderController.trackOrderStatus,
+    );
+
 orderRouter.get(
   "/:id",
   authGuard(UserRole.CUSTOMER, UserRole.ADMIN, UserRole.SELLER),

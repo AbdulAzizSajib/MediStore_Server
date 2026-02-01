@@ -6,6 +6,7 @@ import categoryRouter from "./modules/category/category.router";
 import medicineRouter from "./modules/medicine/medicine.router";
 import orderRouter from "./modules/order/order.router";
 import userRouter from "./modules/user/user.router";
+import reviewRouter from "./modules/review/review.router";
 
 const app = express();
 
@@ -30,5 +31,6 @@ app.use("/api/category", categoryRouter);
 app.use("/api/medicine", medicineRouter);
 app.use("/api/order", orderRouter);
 app.use("/api/user", userRouter);
+app.use("/api/review", reviewRouter);
 
 export default app;

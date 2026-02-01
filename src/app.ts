@@ -18,6 +18,12 @@ app.use(
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// server health check
+app.get("/", (_req, res) => {
+  res.status(200).send("Server is running...");
+});
+
 app.all("/api/auth/*splat", toNodeHandler(auth));
 
 app.use("/api/category", categoryRouter);

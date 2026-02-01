@@ -27,11 +27,11 @@ orderRouter.get(
   orderController.getOrderBySellerId,
 );
 
-    orderRouter.get(
-      "/track/:id",
-      authGuard(UserRole.CUSTOMER),
-      orderController.trackOrderStatus,
-    );
+orderRouter.get(
+  "/:id/status",
+  authGuard(UserRole.CUSTOMER),
+  orderController.trackOrderStatus,
+);
 
 orderRouter.get(
   "/:id",

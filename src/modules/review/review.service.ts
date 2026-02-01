@@ -1,15 +1,26 @@
 import { prisma } from "../../lib/prisma";
-import { customerReview } from "./review.controller";
+import { UserRole } from "../../middlewares/authGuard";
+import { customerReviewType } from "./review.controller";
 
 const createCustomerReview = async (
     userId: string,
-    payload: customerReview
+    payload: customerReviewType
 ) => {
    
     if (payload.rating < 1 || payload.rating > 5) {
         throw new Error("Rating must be between 1 and 5");
     }
 
+    const isCustomer = await prisma.user.findUnique({
+        where:{
+            id: userId,
+            role: UserRole.CUSTOMER,
+        }
+    })
+
+    if(!isCustomer){
+        throw new Error("Only login customers can create reviews");
+    }
    
     // Check if user has purchased this medicine
     const orderItem = await prisma.orderItem.findFirst({
@@ -22,6 +33,20 @@ const createCustomerReview = async (
         throw new Error("You can only review medicines you have purchased");
     }
 
+
+    // Check if user already reviewed this medicine
+    const existingReview = await prisma.review.findUnique({
+        where: {
+            userId_medicineId: {
+                userId: userId,
+                medicineId: payload.medicineId,
+            },
+        },
+    });
+
+    if (existingReview) {
+        throw new Error("You have already reviewed this medicine. Please update your existing review instead.");
+    }
 
     // Create the review
     const review = await prisma.review.create({
@@ -50,6 +75,61 @@ const createCustomerReview = async (
     return review;
 }
 
+const updateCustomerReview = async (
+    userId: string,
+    payload: customerReviewType
+) => {
+    if (payload.rating < 1 || payload.rating > 5) {
+        throw new Error("Rating must be between 1 and 5");
+    }
+
+    // Check if review exists
+    const existingReview = await prisma.review.findUnique({
+        where: {
+            userId_medicineId: {
+                userId: userId,
+                medicineId: payload.medicineId,
+            },
+        },
+    });
+
+    if (!existingReview) {
+        throw new Error("Review not found. Please create a review first.");
+    }
+
+    // Update the review
+    const review = await prisma.review.update({
+        where: {
+            userId_medicineId: {
+                userId: userId,
+                medicineId: payload.medicineId,
+            },
+        },
+        data: {
+            rating: payload.rating,
+            comment: payload.comment || null,
+        },
+        include: {
+            user: {
+                select: {
+                    id: true,
+                    name: true,
+                    image: true,
+                },
+            },
+            medicine: {
+                select: {
+                    id: true,
+                    name: true,
+                },
+            },
+        },
+    });
+
+    return review;
+}
+
 export const reviewService = {
     createCustomerReview,
+    updateCustomerReview,
 };

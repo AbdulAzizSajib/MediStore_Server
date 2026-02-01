@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { reviewService } from "./review.service";
 
-export interface customerReview {
+export interface customerReviewType {
     medicineId: string;
     rating: number;
     comment?: string;
@@ -9,16 +9,21 @@ export interface customerReview {
 
 const createCustomerReview = async (req: Request , res: Response) => {
     try {
-        const userId = req.user?.id;
+        const user = req.user;
+        console.log(user?.id)
+        const payload: customerReviewType = {
+            medicineId: req.body.medicineId,
+            rating: req.body.rating,
+            comment: req.body.comment,
+        };
         
-        if (!userId) {
+        if (!user?.id) {
             return res.status(401).json({
                 success: false,
                 message: "User not authenticated",
             });
         }
 
-        const payload = req.body;
         
         // Basic validation
         if (!payload.medicineId || !payload.rating) {
@@ -28,7 +33,7 @@ const createCustomerReview = async (req: Request , res: Response) => {
             });
         }
         
-        const result = await reviewService.createCustomerReview(userId, payload as customerReview);
+        const result = await reviewService.createCustomerReview(user?.id, payload);
         
         res.status(201).json({
             success: true,
@@ -44,6 +49,47 @@ const createCustomerReview = async (req: Request , res: Response) => {
     }
 };
 
+const updateCustomerReview = async (req: Request, res: Response) => {
+    try {
+        const user = req.user;
+        const payload: customerReviewType = {
+            medicineId: req.body.medicineId,
+            rating: req.body.rating,
+            comment: req.body.comment,
+        };
+
+        if (!user?.id) {
+            return res.status(401).json({
+                success: false,
+                message: "User not authenticated",
+            });
+        }
+
+        // Basic validation
+        if (!payload.medicineId || !payload.rating) {
+            return res.status(400).json({
+                success: false,
+                message: "Medicine ID and rating are required",
+            });
+        }
+
+        const result = await reviewService.updateCustomerReview(user?.id, payload);
+
+        res.status(200).json({
+            success: true,
+            message: "Review updated successfully",
+            data: result,
+        });
+    } catch (error: any) {
+        console.error("Update review error:", error);
+        res.status(400).json({
+            success: false,
+            message: error.message || "Failed to update review",
+        });
+    }
+};
+
 export const reviewController = {
     createCustomerReview,
+    updateCustomerReview,
 };

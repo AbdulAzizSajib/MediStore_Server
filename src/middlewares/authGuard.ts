@@ -30,7 +30,7 @@ const authGuard = (...roles: UserRole[]) => {
       console.log("Session Data Today:", session);
 
       if (!session) {
-        return res.status(401).json({ message: "You are not authorized" });
+        return res.status(401).json({ message: "You are not authorized, please log in." });
       }
 
       if (!session.user.emailVerified) {

@@ -3,7 +3,7 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma";
 
 export const auth = betterAuth({
-  baseURL: process.env.BETTER_AUTH_URL ,
+  baseURL: process.env.BETTER_AUTH_URL,
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
@@ -16,14 +16,14 @@ export const auth = betterAuth({
 
   trustedOrigins: [
     process.env.FRONTEND_URL!,
-    "https://medistoreclient.vercel.app"
+    "https://medistoreclient.vercel.app",
   ],
 
   user: {
     additionalFields: {
       role: {
         type: "string",
-        defaultValue: "CUSTOMER",
+        // defaultValue: "CUSTOMER",
         required: false,
       },
       phone: {
@@ -44,7 +44,7 @@ export const auth = betterAuth({
     },
   },
 
-   socialProviders: {
+  socialProviders: {
     google: {
       prompt: "select_account consent",
       accessType: "offline",
@@ -52,6 +52,4 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     },
   },
-
-
 });
